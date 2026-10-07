@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operator Login – Intelligent Traffic Control | Cross River State</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body>
+  <div class="auth-page operator-auth">
+    <div class="auth-top">
+      <img src="images/cross-river-logo.png" alt="Cross River State">
+      <div class="auth-top-text">
+        <div class="state">Cross River State</div>
+        <div class="system">Intelligent Traffic Control · Fuzzy Logic</div>
+      </div>
+    </div>
+
+    <div class="auth-box">
+      <div class="auth-badge operator-badge">Operator</div>
+      <h1>Operator Login</h1>
+      <p class="sub">Run traffic simulations and view your history</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter password" required>
+        </div>
+        <div class="show-pass-row">
+          <input type="checkbox" id="showPassword">
+          <label for="showPassword">Show Password</label>
+        </div>
+        <p id="error" class="error"></p>
+        <button type="submit" class="btn btn-primary">Login as Operator</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>No account? <a href="register.html">Register as Operator</a></p>
+        <p style="margin-top:0.75rem;">
+          <a href="admin-login.html">Admin Login</a> ·
+          <a href="index.html">Home</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.getElementById("showPassword").addEventListener("change", function () {
+      document.getElementById("password").type = this.checked ? "text" : "password";
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var errorEl = document.getElementById("error");
+      errorEl.textContent = "";
+
+      api("/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email: document.getElementById("email").value.trim().toLowerCase(),
+          password: document.getElementById("password").value
+        })
+      }).then(function (data) {
+        if (data.user.role === "admin") {
+          errorEl.textContent = "Admin accounts must use the Admin Login page.";
+          return;
+        }
+        setCurrentUser(data.user);
+        window.location.href = "operator-dashboard.html";
+      }).catch(function (err) {
+        errorEl.textContent = err.message || "Login failed";
+      });
+    });
+  </script>
+</body>
+</html>

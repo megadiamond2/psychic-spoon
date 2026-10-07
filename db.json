@@ -1,0 +1,114 @@
+{
+  "users": [
+    {
+      "id": "admin-001",
+      "fullName": "System Administrator",
+      "email": "admin@traffic.crs.gov.ng",
+      "password": "admin123",
+      "role": "admin",
+      "createdAt": "2026-09-30T21:08:26.299Z"
+    },
+    {
+      "id": "5295c487-1a86-45e6-8449-7d89084e58a8",
+      "fullName": "Joy",
+      "email": "joyabang004@gmail.com",
+      "password": "Rita01",
+      "role": "operator",
+      "createdAt": "2026-10-05T12:33:48.523Z"
+    }
+  ],
+  "intersections": [
+    {
+      "id": "int-01",
+      "name": "Marian Junction",
+      "location": "Calabar",
+      "approaches": 4,
+      "status": "active"
+    },
+    {
+      "id": "int-02",
+      "name": "Watt Market Roundabout",
+      "location": "Calabar",
+      "approaches": 4,
+      "status": "active"
+    },
+    {
+      "id": "int-03",
+      "name": "Parliamentary Junction",
+      "location": "Calabar",
+      "approaches": 3,
+      "status": "active"
+    },
+    {
+      "id": "int-04",
+      "name": "Ikom Town Junction",
+      "location": "Ikom",
+      "approaches": 4,
+      "status": "active"
+    },
+    {
+      "id": "int-05",
+      "name": "Ogoja Central",
+      "location": "Ogoja",
+      "approaches": 3,
+      "status": "active"
+    },
+    {
+      "id": "int-06",
+      "name": "Ugep Main Road",
+      "location": "Yakurr",
+      "approaches": 4,
+      "status": "active"
+    }
+  ],
+  "history": [
+    {
+      "id": "131c7480-5692-4351-82d8-7b654c6d2e57",
+      "userId": "5295c487-1a86-45e6-8449-7d89084e58a8",
+      "userName": "Joy",
+      "intersectionId": "int-01",
+      "intersectionName": "Marian Junction",
+      "approach": "North",
+      "density": 45,
+      "waitingTime": 35,
+      "greenDuration": 42,
+      "timestamp": "2026-10-05T13:08:20.933Z"
+    },
+    {
+      "id": "87c6a7e5-b091-4f9c-b368-cd0838c74442",
+      "userId": "admin-001",
+      "userName": "System Administrator",
+      "intersectionId": "int-01",
+      "intersectionName": "Marian Junction",
+      "approach": "North",
+      "density": 45,
+      "waitingTime": 35,
+      "greenDuration": 42,
+      "timestamp": "2026-10-05T12:41:09.428Z"
+    },
+    {
+      "id": "4471ab3a-0ea2-435e-8586-9e86a3514cb6",
+      "userId": "5295c487-1a86-45e6-8449-7d89084e58a8",
+      "userName": "Joy",
+      "intersectionId": "int-01",
+      "intersectionName": "Marian Junction",
+      "approach": "North",
+      "density": 45,
+      "waitingTime": 35,
+      "greenDuration": 42,
+      "timestamp": "2026-10-05T12:37:35.512Z"
+    },
+    {
+      "id": "d25fccb6-3a55-4e85-9ecf-a803ba1d1828",
+      "userId": "5295c487-1a86-45e6-8449-7d89084e58a8",
+      "userName": "Joy",
+      "intersectionId": "int-01",
+      "intersectionName": "Marian Junction",
+      "approach": "North",
+      "density": 45,
+      "waitingTime": 35,
+      "greenDuration": 42,
+      "timestamp": "2026-10-05T12:36:33.914Z"
+    }
+  ]
+}

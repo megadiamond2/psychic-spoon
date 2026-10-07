@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My History – Traffic Fuzzy | Cross River State</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="images/cross-river-logo.png" alt="CRS">
+        <div class="brand-text">
+          <span class="app-name">TrafficFuzzy</span>
+          <span class="app-sub">Cross River State</span>
+        </div>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="operator-dashboard.html">🎛️ Control Panel</a>
+        <a href="operator-history.html" class="active">📜 My History</a>
+        <a href="#" id="logoutBtn">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>My Decision History</h1>
+          <p>Your Fuzzy Logic simulation results</p>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date / Time</th>
+              <th>Intersection</th>
+              <th>Approach</th>
+              <th>Density</th>
+              <th>Waiting (s)</th>
+              <th>Green Duration (s)</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var user = requireOperator();
+      if (!user) return;
+
+      document.getElementById("logoutBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+
+      api("/history?userId=" + encodeURIComponent(user.id)).then(function (history) {
+        var tbody = document.getElementById("historyBody");
+        if (!history.length) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#64748b;">No decisions yet. Run a simulation first.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = history.map(function (h) {
+          return '<tr><td>' + new Date(h.timestamp).toLocaleString() + '</td><td>' +
+            h.intersectionName + '</td><td>' + h.approach + '</td><td>' + h.density +
+            '</td><td>' + h.waitingTime + '</td><td><strong>' + h.greenDuration + '</strong></td></tr>';
+        }).join("");
+      });
+    });
+  </script>
+</body>
+</html>

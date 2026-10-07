@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Panel – Traffic Fuzzy | Cross River State</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="images/cross-river-logo.png" alt="CRS">
+        <div class="brand-text">
+          <span class="app-name">TrafficFuzzy</span>
+          <span class="app-sub">Cross River State</span>
+        </div>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="operator-dashboard.html" class="active">🎛️ Control Panel</a>
+        <a href="operator-history.html">📜 My History</a>
+        <a href="#" id="logoutBtn">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Traffic Control Panel</h1>
+          <p>Welcome, <span id="userName">Operator</span> · Fuzzy Logic decision support</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Input Traffic Parameters</h2>
+        <form id="trafficForm">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1rem;">
+            <div class="form-group">
+              <label for="intersection">Intersection</label>
+              <select id="intersection" required></select>
+            </div>
+            <div class="form-group">
+              <label for="approach">Approach</label>
+              <select id="approach" required>
+                <option value="North">North</option>
+                <option value="South">South</option>
+                <option value="East">East</option>
+                <option value="West">West</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="density">Traffic Density (0–100)</label>
+              <input type="number" id="density" min="0" max="100" value="45" required>
+            </div>
+            <div class="form-group">
+              <label for="waiting">Waiting Time (seconds)</label>
+              <input type="number" id="waiting" min="0" max="180" value="35" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:0.65rem;">Run Fuzzy Logic Decision</button>
+        </form>
+      </div>
+
+      <div class="card" id="resultCard" style="display:none;">
+        <h2>Fuzzy Logic Decision</h2>
+
+        <div class="traffic-light-box">
+          <div class="approach-box">
+            <h4 id="resultApproach">Approach</h4>
+            <div class="traffic-light">
+              <div class="light red" id="lightRed"></div>
+              <div class="light yellow" id="lightYellow"></div>
+              <div class="light green" id="lightGreen"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="label">Recommended Green Light Duration</div>
+          <div class="duration" id="greenDuration">—</div>
+          <div class="label">seconds</div>
+        </div>
+
+        <div style="margin-top:1.15rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div>
+            <strong>Density Membership:</strong>
+            <div id="densInfo" style="font-size:0.88rem; color:var(--gray); margin-top:0.25rem;"></div>
+          </div>
+          <div>
+            <strong>Waiting Membership:</strong>
+            <div id="waitInfo" style="font-size:0.88rem; color:var(--gray); margin-top:0.25rem;"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/fuzzy.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var user = requireOperator();
+      if (!user) return;
+
+      document.getElementById("userName").textContent = user.fullName.split(" ")[0];
+      document.getElementById("logoutBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+
+      var select = document.getElementById("intersection");
+      api("/intersections?active=1").then(function (intersections) {
+        intersections.forEach(function (i) {
+          var opt = document.createElement("option");
+          opt.value = i.id;
+          opt.textContent = i.name + " (" + i.location + ")";
+          select.appendChild(opt);
+        });
+      }).catch(function () {
+        showToast("Cannot reach server. Start Node.js backend.");
+      });
+
+      document.getElementById("trafficForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        var intersectionId = document.getElementById("intersection").value;
+        var approach = document.getElementById("approach").value;
+        var density = Number(document.getElementById("density").value);
+        var waiting = Number(document.getElementById("waiting").value);
+
+        var result = calculateGreenDuration(density, waiting);
+
+        document.getElementById("resultCard").style.display = "block";
+        document.getElementById("resultApproach").textContent = approach + " Approach";
+        document.getElementById("greenDuration").textContent = result.greenDuration;
+
+        document.getElementById("lightRed").classList.remove("active");
+        document.getElementById("lightYellow").classList.remove("active");
+        document.getElementById("lightGreen").classList.add("active");
+
+        var d = result.densFuzzy;
+        document.getElementById("densInfo").innerHTML =
+          "Low: " + (d.low * 100).toFixed(0) + "% | Medium: " + (d.medium * 100).toFixed(0) +
+          "% | High: " + (d.high * 100).toFixed(0) + "%";
+
+        var w = result.waitFuzzy;
+        document.getElementById("waitInfo").innerHTML =
+          "Short: " + (w.short * 100).toFixed(0) + "% | Medium: " + (w.medium * 100).toFixed(0) +
+          "% | Long: " + (w.long * 100).toFixed(0) + "%";
+
+        var selectedOpt = select.options[select.selectedIndex];
+        var intersectionName = selectedOpt ? selectedOpt.textContent.split(" (")[0] : "Unknown";
+
+        api("/history", {
+          method: "POST",
+          body: JSON.stringify({
+            userId: user.id,
+            userName: user.fullName,
+            intersectionId: intersectionId,
+            intersectionName: intersectionName,
+            approach: approach,
+            density: density,
+            waitingTime: waiting,
+            greenDuration: result.greenDuration
+          })
+        }).then(function () {
+          showToast("Fuzzy decision calculated and saved to server");
+        }).catch(function (err) {
+          showToast(err.message || "Saved locally only – server error");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

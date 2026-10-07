@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login – Intelligent Traffic Control | Cross River State</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body>
+  <div class="auth-page admin-auth">
+    <div class="auth-top">
+      <img src="images/cross-river-logo.png" alt="Cross River State">
+      <div class="auth-top-text">
+        <div class="state">Cross River State</div>
+        <div class="system">Intelligent Traffic Control · Fuzzy Logic</div>
+      </div>
+    </div>
+
+    <div class="auth-box">
+      <div class="auth-badge admin-badge">Administrator</div>
+      <h1>Admin Login</h1>
+      <p class="sub">Manage intersections, operators and system history</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Admin Email</label>
+          <input type="email" id="email" placeholder="admin@traffic.crs.gov.ng" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter password" required>
+        </div>
+        <div class="show-pass-row">
+          <input type="checkbox" id="showPassword">
+          <label for="showPassword">Show Password</label>
+        </div>
+        <p id="error" class="error"></p>
+        <button type="submit" class="btn btn-primary">Login as Admin</button>
+      </form>
+
+      <div class="auth-footer">
+        <div class="auth-demo">
+          <strong>Demo Admin:</strong><br>
+          admin@traffic.crs.gov.ng / admin123
+        </div>
+        <p>
+          <a href="operator-login.html">Operator Login</a> ·
+          <a href="index.html">Home</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.getElementById("showPassword").addEventListener("change", function () {
+      document.getElementById("password").type = this.checked ? "text" : "password";
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var errorEl = document.getElementById("error");
+      errorEl.textContent = "";
+
+      api("/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email: document.getElementById("email").value.trim().toLowerCase(),
+          password: document.getElementById("password").value
+        })
+      }).then(function (data) {
+        if (data.user.role !== "admin") {
+          errorEl.textContent = "This account is not an administrator. Use Operator Login.";
+          return;
+        }
+        setCurrentUser(data.user);
+        window.location.href = "admin-dashboard.html";
+      }).catch(function (err) {
+        errorEl.textContent = err.message || "Login failed";
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard – Traffic Fuzzy | Cross River State</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="images/cross-river-logo.png" alt="CRS">
+        <div class="brand-text">
+          <span class="app-name">TrafficFuzzy</span>
+          <span class="app-sub">Cross River State</span>
+        </div>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="admin-dashboard.html" class="active">🏠 Dashboard</a>
+        <a href="manage-intersections.html">🗺️ Intersections</a>
+        <a href="manage-operators.html">👥 Operators</a>
+        <a href="admin-history.html">📜 All History</a>
+        <a href="#" id="logoutBtn">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p>Intelligent Traffic Control · Cross River State</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon teal">🗺️</div>
+          <div class="stat-info">
+            <h3 id="statIntersections">0</h3>
+            <p>Intersections</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">👥</div>
+          <div class="stat-info">
+            <h3 id="statOperators">0</h3>
+            <p>Operators</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">📊</div>
+          <div class="stat-info">
+            <h3 id="statDecisions">0</h3>
+            <p>Total Decisions</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">⏱️</div>
+          <div class="stat-info">
+            <h3 id="statAvgGreen">0</h3>
+            <p>Avg Green (s)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Quick Actions</h2>
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <a href="manage-intersections.html" class="btn btn-primary">Manage Intersections</a>
+          <a href="manage-operators.html" class="btn btn-outline">Manage Operators</a>
+          <a href="admin-history.html" class="btn btn-outline">View Full History</a>
+          <a href="operator-dashboard.html" class="btn btn-success">Open Control Panel</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Recent Decisions</h2>
+        <div class="table-wrapper" style="box-shadow:none; border:none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Operator</th>
+                <th>Intersection</th>
+                <th>Approach</th>
+                <th>Green (s)</th>
+              </tr>
+            </thead>
+            <tbody id="recentBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var user = requireAdmin();
+      if (!user) return;
+
+      document.getElementById("logoutBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+
+      api("/stats").then(function (s) {
+        document.getElementById("statIntersections").textContent = s.intersections;
+        document.getElementById("statOperators").textContent = s.operators;
+        document.getElementById("statDecisions").textContent = s.decisions;
+        document.getElementById("statAvgGreen").textContent = s.avgGreen;
+      }).catch(function () {
+        showToast("Cannot reach server. Start Node.js backend.");
+      });
+
+      api("/history").then(function (history) {
+        var recent = history.slice(0, 8);
+        var tbody = document.getElementById("recentBody");
+        if (recent.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:#64748b;">No decisions yet.</td></tr>';
+        } else {
+          tbody.innerHTML = recent.map(function (h) {
+            return '<tr><td>' + new Date(h.timestamp).toLocaleString() + '</td><td>' +
+              (h.userName || "—") + '</td><td>' + h.intersectionName + '</td><td>' +
+              h.approach + '</td><td><strong>' + h.greenDuration + '</strong></td></tr>';
+          }).join("");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

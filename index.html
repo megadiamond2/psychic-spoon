@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intelligent Traffic Control System – Cross River State</title>
+  <meta name="description" content="Design and Implementation of an Intelligent Traffic Control System using Fuzzy Logic for Cross River State. Adaptive green-light timing based on density and waiting time.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body class="home-page">
+  <header class="header transparent-header">
+    <nav class="nav">
+      <a href="index.html" class="logo">
+        <img src="images/cross-river-logo.png" alt="Cross River State" class="logo-img">
+        Traffic<span>Fuzzy</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="operator-login.html">Operator Login</a>
+        <a href="admin-login.html">Admin Login</a>
+        <a href="register.html" class="btn btn-primary">Register as Operator</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero hero-traffic">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Cross River State · Final Year Project</div>
+      <h1>Intelligent Traffic Control System Using Fuzzy Logic</h1>
+      <p>
+        Adaptive traffic signal management for intersections across Cross River State.
+        Fuzzy Logic (Mamdani inference &amp; centroid defuzzification) decides green-light
+        duration from traffic density and waiting time — reducing congestion with a Node.js backend.
+      </p>
+      <div class="hero-buttons">
+        <a href="operator-login.html" class="btn btn-primary">Operator Login</a>
+        <a href="admin-login.html" class="btn btn-light">Admin Login</a>
+        <a href="register.html" class="btn btn-outline-light">Register as Operator</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <h3>Fuzzy Logic Engine</h3>
+      <p>Adaptive green-light timing based on traffic density and waiting time using Mamdani inference and centroid defuzzification (matches Chapter 4 design).</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚦</div>
+      <h3>Visual Signal Control</h3>
+      <p>Real-time visualisation of Red, Yellow and Green signals for each approach at selected Cross River intersections.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Decision History</h3>
+      <p>All simulation results are stored on the Node.js server (JSON database) for analysis, reporting and admin oversight.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <h3>Admin &amp; Operator Roles</h3>
+      <p>Operators run simulations. Administrators manage intersections, operators and view system-wide statistics via the API.</p>
+    </div>
+  </section>
+
+  <footer class="home-footer">
+    <img src="images/cross-river-logo.png" alt="Cross River" class="footer-logo">
+    <p class="project-title">Intelligent Traffic Control System Using Fuzzy Logic for Cross River State</p>
+    <p>© 2026 · Design &amp; Implementation · Node.js Backend · Final Year Project</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operator Registration – Intelligent Traffic Control | Cross River State</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body>
+  <div class="auth-page operator-auth">
+    <div class="auth-top">
+      <img src="images/cross-river-logo.png" alt="Cross River State">
+      <div class="auth-top-text">
+        <div class="state">Cross River State</div>
+        <div class="system">Intelligent Traffic Control · Fuzzy Logic</div>
+      </div>
+    </div>
+
+    <div class="auth-box">
+      <div class="auth-badge operator-badge">New Operator</div>
+      <h1>Operator Registration</h1>
+      <p class="sub">Create an account to run traffic simulations</p>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Min 6 characters" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Re-enter password" required minlength="6">
+        </div>
+        <p id="error" class="error"></p>
+        <button type="submit" class="btn btn-primary">Register as Operator</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="operator-login.html">Operator Login</a></p>
+        <p style="margin-top:0.75rem;"><a href="index.html">← Back to Home</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var errorEl = document.getElementById("error");
+      errorEl.textContent = "";
+
+      var fullName = document.getElementById("fullName").value.trim();
+      var email = document.getElementById("email").value.trim().toLowerCase();
+      var password = document.getElementById("password").value;
+      var confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password !== confirmPassword) {
+        errorEl.textContent = "Passwords do not match.";
+        return;
+      }
+      if (password.length < 6) {
+        errorEl.textContent = "Password must be at least 6 characters.";
+        return;
+      }
+
+      api("/register", {
+        method: "POST",
+        body: JSON.stringify({ fullName: fullName, email: email, password: password })
+      }).then(function () {
+        alert("Registration successful! You can now login.");
+        window.location.href = "operator-login.html";
+      }).catch(function (err) {
+        errorEl.textContent = err.message || "Registration failed";
+      });
+    });
+  </script>
+</body>
+</html>

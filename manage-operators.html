@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Operators – Traffic Fuzzy | Cross River State</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="images/cross-river-logo.png" alt="CRS">
+        <div class="brand-text">
+          <span class="app-name">TrafficFuzzy</span>
+          <span class="app-sub">Cross River State</span>
+        </div>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="admin-dashboard.html">🏠 Dashboard</a>
+        <a href="manage-intersections.html">🗺️ Intersections</a>
+        <a href="manage-operators.html" class="active">👥 Operators</a>
+        <a href="admin-history.html">📜 All History</a>
+        <a href="#" id="logoutBtn">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Manage Operators</h1>
+          <p>Traffic control operators for Cross River State</p>
+        </div>
+        <button class="btn btn-primary" id="showAddBtn">+ Add Operator</button>
+      </div>
+
+      <div class="card" id="addFormCard" style="display:none;">
+        <h2>Add New Operator</h2>
+        <form id="addOperatorForm">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="opName" required>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="opEmail" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="text" id="opPassword" required minlength="6" placeholder="Min 6 characters">
+            </div>
+          </div>
+          <div style="display:flex; gap:0.75rem; margin-top:0.4rem;">
+            <button type="submit" class="btn btn-primary">Create Operator</button>
+            <button type="button" class="btn btn-outline" id="cancelAdd">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>S/N</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="opTableBody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var user = requireAdmin();
+      if (!user) return;
+
+      document.getElementById("logoutBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+
+      var addCard = document.getElementById("addFormCard");
+      document.getElementById("showAddBtn").onclick = function () { addCard.style.display = "block"; };
+      document.getElementById("cancelAdd").onclick = function () { addCard.style.display = "none"; };
+
+      function renderTable() {
+        api("/users").then(function (operators) {
+          var tbody = document.getElementById("opTableBody");
+          if (!operators.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#64748b;">No operators yet.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = operators.map(function (op, i) {
+            return '<tr><td>' + (i + 1) + '</td><td>' + op.fullName + '</td><td>' + op.email +
+              '</td><td>' + new Date(op.createdAt).toLocaleDateString() +
+              '</td><td><button class="btn btn-sm btn-danger" onclick="deleteOperator(\'' + op.id +
+              '\')">Delete</button></td></tr>';
+          }).join("");
+        });
+      }
+
+      window.deleteOperator = function (id) {
+        if (!confirm("Delete this operator?")) return;
+        api("/users/" + id, { method: "DELETE" }).then(function () {
+          renderTable();
+          showToast("Operator deleted");
+        });
+      };
+
+      document.getElementById("addOperatorForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        api("/users", {
+          method: "POST",
+          body: JSON.stringify({
+            fullName: document.getElementById("opName").value.trim(),
+            email: document.getElementById("opEmail").value.trim().toLowerCase(),
+            password: document.getElementById("opPassword").value
+          })
+        }).then(function () {
+          document.getElementById("addOperatorForm").reset();
+          addCard.style.display = "none";
+          renderTable();
+          showToast("Operator created successfully");
+        }).catch(function (err) {
+          alert(err.message || "Failed");
+        });
+      });
+
+      renderTable();
+    });
+  </script>
+</body>
+</html>

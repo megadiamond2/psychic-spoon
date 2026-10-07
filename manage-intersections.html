@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Intersections – Traffic Fuzzy | Cross River State</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile-fix.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="images/cross-river-logo.png" alt="CRS">
+        <div class="brand-text">
+          <span class="app-name">TrafficFuzzy</span>
+          <span class="app-sub">Cross River State</span>
+        </div>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="admin-dashboard.html">🏠 Dashboard</a>
+        <a href="manage-intersections.html" class="active">🗺️ Intersections</a>
+        <a href="manage-operators.html">👥 Operators</a>
+        <a href="admin-history.html">📜 All History</a>
+        <a href="#" id="logoutBtn">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Manage Intersections</h1>
+          <p>Cross River State traffic junctions</p>
+        </div>
+        <button class="btn btn-primary" id="showAddBtn">+ Add Intersection</button>
+      </div>
+
+      <div class="card" id="addFormCard" style="display:none;">
+        <h2>Add New Intersection</h2>
+        <form id="addIntersectionForm">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="intName" required placeholder="e.g. Marian Junction">
+            </div>
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" id="intLocation" required placeholder="e.g. Calabar">
+            </div>
+            <div class="form-group">
+              <label>Number of Approaches</label>
+              <select id="intApproaches">
+                <option value="3">3</option>
+                <option value="4" selected>4</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.75rem; margin-top:0.4rem;">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-outline" id="cancelAdd">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>S/N</th>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Approaches</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="intTableBody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var user = requireAdmin();
+      if (!user) return;
+
+      document.getElementById("logoutBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+
+      var addCard = document.getElementById("addFormCard");
+      document.getElementById("showAddBtn").onclick = function () { addCard.style.display = "block"; };
+      document.getElementById("cancelAdd").onclick = function () { addCard.style.display = "none"; };
+
+      function renderTable() {
+        api("/intersections").then(function (data) {
+          var tbody = document.getElementById("intTableBody");
+          if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#64748b;">No intersections.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.map(function (item, i) {
+            return '<tr><td>' + (i + 1) + '</td><td>' + item.name + '</td><td>' + item.location +
+              '</td><td>' + item.approaches + '</td><td>' +
+              (item.status === "active" ? "✅ Active" : "❌ Disabled") +
+              '</td><td><button class="btn btn-sm ' + (item.status === "active" ? "btn-outline" : "btn-success") +
+              '" onclick="toggleStatus(\'' + item.id + '\',\'' + item.status + '\')">' +
+              (item.status === "active" ? "Disable" : "Enable") +
+              '</button> <button class="btn btn-sm btn-danger" onclick="deleteIntersection(\'' + item.id +
+              '\')">Delete</button></td></tr>';
+          }).join("");
+        });
+      }
+
+      window.toggleStatus = function (id, current) {
+        var next = current === "active" ? "disabled" : "active";
+        api("/intersections/" + id, {
+          method: "PUT",
+          body: JSON.stringify({ status: next })
+        }).then(function () {
+          renderTable();
+          showToast("Status updated");
+        });
+      };
+
+      window.deleteIntersection = function (id) {
+        if (!confirm("Delete this intersection?")) return;
+        api("/intersections/" + id, { method: "DELETE" }).then(function () {
+          renderTable();
+          showToast("Intersection deleted");
+        });
+      };
+
+      document.getElementById("addIntersectionForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        api("/intersections", {
+          method: "POST",
+          body: JSON.stringify({
+            name: document.getElementById("intName").value.trim(),
+            location: document.getElementById("intLocation").value.trim(),
+            approaches: Number(document.getElementById("intApproaches").value)
+          })
+        }).then(function () {
+          document.getElementById("addIntersectionForm").reset();
+          addCard.style.display = "none";
+          renderTable();
+          showToast("Intersection added");
+        }).catch(function (err) {
+          alert(err.message || "Failed");
+        });
+      });
+
+      renderTable();
+    });
+  </script>
+</body>
+</html>
